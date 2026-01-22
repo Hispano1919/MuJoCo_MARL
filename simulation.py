@@ -103,12 +103,7 @@ def main():
             'pos': [0, -1.5, 0.1],
             'color': [0, 0, 1, 1],
         },
-        {
-            'name': 'cube_bot',
-            'type': 'prueba',
-            'pos': [1.5, 0, 0.1],
-            'color': [0.8, 0.2, 0.2, 1],
-        },
+
     ]
     
     print(f"\n2. Configurando {len(robot_configs)} robots...")
@@ -217,8 +212,9 @@ def main():
                         robot_type = controller.config.get('type', 'basico')
                         
                         # Aplicar control
-                        estado = simple_control(controller, robot_type)
-                        
+                        estado = "Probando" #simple_control(controller, robot_type)
+                        controller.set_wheel_velocities(10000.0, 10000.0)
+
                         # Obtener y mostrar imagen
                         img = controller.get_camera_image()
                         if img is not None and img.size > 0:

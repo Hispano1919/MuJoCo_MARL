@@ -72,36 +72,15 @@
                 <geom type="sphere" size="0.05" rgba="0.7 0.7 0.7 1" friction="0.005" mass="0.5"/>
             </body>
         </body>
-
-        <!-- Robot: cube_bot (Tipo: prueba) -->
-        <body name="cube_bot_base" pos="1.5 0 0.1">
-            <freejoint/> 
-            <!-- Cubo principal -->
-            <geom name="cube_bot_cubo" type="box" size="0.2 0.2 0.2" pos="0 0 0.2" rgba="0.8 0.2 0.2 1" mass="8" contype="0" conaffinity="0"/>
-            
-            <!-- Rueda única -->
-            <body name="cube_bot_rueda" pos="0 0 0" quat="0.7071 0.7071 0 0">
-                <joint name="cube_bot_rueda_joint" type="hinge" axis="0 0 1" damping="0.5"/>
-                <geom type="cylinder" size="0.15 0.03" rgba="0.3 0.3 0.3 1" friction="1.5" mass="2"/>
-            </body>
-            
-            <!-- Sensor LiDAR simple -->
-            <site name="cube_bot_lidar_site" pos="0.25 0 0.2" />
-            
-            <!-- Cámara frontal -->
-            <camera name="cube_bot_robot_camera" pos="0.2 0 0.25" quat="0.5 0.5 -0.5 -0.5" />
-        </body>
     </worldbody>
     <sensor>
         <rangefinder name="distancia_explorer" site="explorer_lidar_site" />
         <rangefinder name="distancia_guardian" site="guardian_lidar_site" />
-        <rangefinder name="distancia_cube_bot" site="cube_bot_lidar_site" />
     </sensor>
     <actuator>
         <velocity name="motor_izquierdo_explorer" joint="explorer_base_left_wheel_joint" kv="20" forcerange="-10 10"/>
         <velocity name="motor_derecho_explorer" joint="explorer_base_right_wheel_joint" kv="20" forcerange="-10 10"/>
         <velocity name="motor_izquierdo_guardian" joint="guardian_base_left_wheel_joint" kv="20" forcerange="-10 10"/>
         <velocity name="motor_derecho_guardian" joint="guardian_base_right_wheel_joint" kv="20" forcerange="-10 10"/>
-        <velocity name="motor_cube_bot" joint="cube_bot_rueda_joint" kv="15" forcerange="-8 8"/>
     </actuator>
 </mujoco>
