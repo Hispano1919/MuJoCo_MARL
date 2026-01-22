@@ -1,0 +1,30 @@
+[
+    {
+        "name": "explorer",
+        "type": "basico",
+        "pos": [0, 2.0, 0.1],
+        "color": [0, 0.6, 0, 1],
+        "behavior": "explore"
+    },
+    {
+        "name": "guardian",
+        "type": "basico", 
+        "pos": [0, -2.0, 0.1],
+        "color": [0, 0, 1, 1],
+        "behavior": "patrol"
+    },
+    {
+        "name": "cube_robot_1",
+        "type": "prueba",
+        "pos": [2.0, 0, 0.1],
+        "color": [0.8, 0.2, 0.2, 1],
+        "behavior": "simple"
+    },
+    {
+        "name": "cube_robot_2",
+        "type": "prueba",
+        "pos": [-2.0, 0, 0.1],
+        "color": [0.8, 0.6, 0.2, 1],
+        "behavior": "simple"
+    }
+]

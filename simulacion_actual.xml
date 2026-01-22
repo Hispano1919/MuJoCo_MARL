@@ -1,0 +1,107 @@
+<mujoco model="multi_robot">
+    <compiler angle="radian" meshdir="assets" />
+    <option gravity="0 0 -9.81" timestep="0.002" iterations="50" />
+
+    <asset>
+        <material name="grey" rgba="0.7 0.7 0.7 1" />
+        <material name="white" rgba="1 1 1 1" />
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" rgb2=".2 .3 .4" width="300" height="300" mark="edge" markrgb=".2 .3 .4"/>
+        <material name="grid" texture="grid" texrepeat="1 1" texuniform="true"/>
+    </asset>
+
+    <visual>
+        <headlight ambient="0.4 0.4 0.4" diffuse="0.8 0.8 0.8"/>
+    </visual>
+
+    <worldbody>
+        <light pos="0 0 3" dir="0 0 -1" directional="true"/>
+        <geom name="floor" type="plane" size="5 5 .05" material="grid" friction="1 0.005 0.0001" contype="1" conaffinity="1"/>
+
+        <!-- Robot: explorer (Tipo: básico) -->
+        <body name="explorer_base" pos="0 1.5 0.1">
+            <freejoint/> 
+            <geom name="explorer_base_visual" type="box" size="0.3 0.2 0.1" pos="0 0 0.05" rgba="0 0.6 0 1" mass="15" contype="0" conaffinity="0"/>
+            
+            <!-- Torre de sensores -->
+            <body name="explorer_sensor_tower" pos="0.1 0 0.175">
+                <geom type="cylinder" size="0.05 0.02" rgba="1 1 1 1" mass="0.1"/>
+                <site name="explorer_lidar_site" pos="0.05 0 0" /> 
+                <camera name="explorer_robot_camera" pos="0.05 0 0.02" quat="0.5 0.5 -0.5 -0.5" />
+            </body>
+
+            <!-- Ruedas -->
+            <body name="explorer_left_wheel" pos="-0.15 0.23 0" quat="0.7071 0.7071 0 0">
+                <joint name="explorer_base_left_wheel_joint" type="hinge" axis="0 0 1" damping="0.5"/>
+                <geom type="cylinder" size="0.1 0.025" rgba="0.7 0.7 0.7 1" friction="1.5" mass="1"/>
+            </body>
+            <body name="explorer_right_wheel" pos="-0.15 -0.23 0" quat="0.7071 0.7071 0 0">
+                <joint name="explorer_base_right_wheel_joint" type="hinge" axis="0 0 1" damping="0.5"/>
+                <geom type="cylinder" size="0.1 0.025" rgba="0.7 0.7 0.7 1" friction="1.5" mass="1"/>
+            </body>
+            
+            <!-- Rueda loca -->
+            <body name="explorer_caster_wheels" pos="0.2 0 -0.05">
+                <geom type="sphere" size="0.05" rgba="0.7 0.7 0.7 1" friction="0.005" mass="0.5"/>
+            </body>
+        </body>
+
+        <!-- Robot: guardian (Tipo: básico) -->
+        <body name="guardian_base" pos="0 -1.5 0.1">
+            <freejoint/> 
+            <geom name="guardian_base_visual" type="box" size="0.3 0.2 0.1" pos="0 0 0.05" rgba="0 0 1 1" mass="15" contype="0" conaffinity="0"/>
+            
+            <!-- Torre de sensores -->
+            <body name="guardian_sensor_tower" pos="0.1 0 0.175">
+                <geom type="cylinder" size="0.05 0.02" rgba="1 1 1 1" mass="0.1"/>
+                <site name="guardian_lidar_site" pos="0.05 0 0" /> 
+                <camera name="guardian_robot_camera" pos="0.05 0 0.02" quat="0.5 0.5 -0.5 -0.5" />
+            </body>
+
+            <!-- Ruedas -->
+            <body name="guardian_left_wheel" pos="-0.15 0.23 0" quat="0.7071 0.7071 0 0">
+                <joint name="guardian_base_left_wheel_joint" type="hinge" axis="0 0 1" damping="0.5"/>
+                <geom type="cylinder" size="0.1 0.025" rgba="0.7 0.7 0.7 1" friction="1.5" mass="1"/>
+            </body>
+            <body name="guardian_right_wheel" pos="-0.15 -0.23 0" quat="0.7071 0.7071 0 0">
+                <joint name="guardian_base_right_wheel_joint" type="hinge" axis="0 0 1" damping="0.5"/>
+                <geom type="cylinder" size="0.1 0.025" rgba="0.7 0.7 0.7 1" friction="1.5" mass="1"/>
+            </body>
+            
+            <!-- Rueda loca -->
+            <body name="guardian_caster_wheels" pos="0.2 0 -0.05">
+                <geom type="sphere" size="0.05" rgba="0.7 0.7 0.7 1" friction="0.005" mass="0.5"/>
+            </body>
+        </body>
+
+        <!-- Robot: cube_bot (Tipo: prueba) -->
+        <body name="cube_bot_base" pos="1.5 0 0.1">
+            <freejoint/> 
+            <!-- Cubo principal -->
+            <geom name="cube_bot_cubo" type="box" size="0.2 0.2 0.2" pos="0 0 0.2" rgba="0.8 0.2 0.2 1" mass="8" contype="0" conaffinity="0"/>
+            
+            <!-- Rueda única -->
+            <body name="cube_bot_rueda" pos="0 0 0" quat="0.7071 0.7071 0 0">
+                <joint name="cube_bot_rueda_joint" type="hinge" axis="0 0 1" damping="0.5"/>
+                <geom type="cylinder" size="0.15 0.03" rgba="0.3 0.3 0.3 1" friction="1.5" mass="2"/>
+            </body>
+            
+            <!-- Sensor LiDAR simple -->
+            <site name="cube_bot_lidar_site" pos="0.25 0 0.2" />
+            
+            <!-- Cámara frontal -->
+            <camera name="cube_bot_robot_camera" pos="0.2 0 0.25" quat="0.5 0.5 -0.5 -0.5" />
+        </body>
+    </worldbody>
+    <sensor>
+        <rangefinder name="distancia_explorer" site="explorer_lidar_site" />
+        <rangefinder name="distancia_guardian" site="guardian_lidar_site" />
+        <rangefinder name="distancia_cube_bot" site="cube_bot_lidar_site" />
+    </sensor>
+    <actuator>
+        <velocity name="motor_izquierdo_explorer" joint="explorer_base_left_wheel_joint" kv="20" forcerange="-10 10"/>
+        <velocity name="motor_derecho_explorer" joint="explorer_base_right_wheel_joint" kv="20" forcerange="-10 10"/>
+        <velocity name="motor_izquierdo_guardian" joint="guardian_base_left_wheel_joint" kv="20" forcerange="-10 10"/>
+        <velocity name="motor_derecho_guardian" joint="guardian_base_right_wheel_joint" kv="20" forcerange="-10 10"/>
+        <velocity name="motor_cube_bot" joint="cube_bot_rueda_joint" kv="15" forcerange="-8 8"/>
+    </actuator>
+</mujoco>
