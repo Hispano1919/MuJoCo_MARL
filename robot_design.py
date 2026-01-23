@@ -43,7 +43,20 @@ def generate_robot_xml(robot_configs, type_manager=None):
 
     <worldbody>
         <light pos="0 0 3" dir="0 0 -1" directional="true"/>
-        <geom name="floor" type="plane" size="5 5 .05" material="grid" friction="1 0.005 0.0001" contype="1" conaffinity="1"/>''']
+        <geom name="floor" type="plane" size="5 5 .05" material="grid" friction="1 0.005 0.0001" contype="1" conaffinity="1"/>
+        <body name="box_obstacle_1" pos="0 5 0.2" >
+            <geom type="box" size="5 0.2 0.2" rgba="1 0 0 1" contype="3" conaffinity="3"/>
+        </body>
+        <body name="box_obstacle_2" pos="0 -5 0.2" >
+            <geom type="box" size="5 0.2 0.2" rgba="1 0 0 1" contype="3" conaffinity="3"/>
+        </body>
+        <body name="box_obstacle_3" pos="5 0 0.2" >
+            <geom type="box" size="0.2 5 0.2" rgba="1 0 0 1" contype="3" conaffinity="3"/>
+        </body>
+        <body name="box_obstacle_4" pos="-5 0 0.2" >
+            <geom type="box" size="0.2 5 0.2" rgba="1 0 0 1" contype="3" conaffinity="3"/>
+        </body>
+        ''']
 
     # Listas para sensores y actuadores
     sensors_xml = []
