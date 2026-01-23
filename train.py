@@ -1,91 +1,85 @@
-import functools
-import gymnasium
-from gymnasium.spaces import Box, Dict
-from pettingzoo import ParallelEnv
-from pettingzoo.utils import wrappers
+import numpy as np
+import gymnasium as gym
+from stable_baselines3 import PPO
+import supersuit as ss
+import os
 
-class MultiRobotEnv(ParallelEnv):
-    metadata = {"render_modes": ["human", "rgb_array"], "name": "mujoco_marl_v0"}
+# Importamos tu entorno (asegúrate de que el archivo se llame environment.py o ajusta el import)
+from environment import CustomEnvironment 
 
-    def __init__(self, robot_configs, type_manager):
-        super().__init__()
-        self.robot_configs = robot_configs
-        self.type_manager = type_manager
-        
-        # 1. Definir nombres de agentes
-        self.agents = [cfg['name'] for cfg in robot_configs]
-        self.possible_agents = self.agents[:]
-        
-        # 2. Configurar MuJoCo (inicialización similar a tu main)
-        self.xml_string = generate_robot_xml(self.robot_configs, self.type_manager)
-        self.model = mujoco.MjModel.from_xml_string(self.xml_string)
-        self.data = mujoco.MjData(self.model)
-        
-        # 3. Inicializar controladores (para acceder a sensores)
-        self.controllers = {}
-        for config in robot_configs:
-            name = config['name']
-            # Reutilizamos tu lógica de controladores actual
-            if config['type'] == 'basico':
-                from basic_robot import BasicRobotController
-                self.controllers[name] = BasicRobotController(self.model, self.data, name, config)
-            # ... agregar otros tipos
+def train():
+    # 1. Crear el entorno
+    # No usamos render_mode='human' aquí para que entrene rápido sin ventanas
+    env = CustomEnvironment(render_mode=None)
 
-    @functools.lru_cache(maxsize=None)
-    def observation_space(self, agent):
-        # Ejemplo: Distancia LiDAR (1 valor) + Posición (3 valores)
-        return Box(low=-np.inf, high=np.inf, shape=(4,), dtype=np.float32)
+    # 2. Wrapper de SuperSuit para compatibilidad con Stable Baselines 3
+    # concat_vec_envs_v1: Toma todos los agentes y los pone en un solo "batch" vectorizado.
+    # Esto permite que SB3 entrene una sola política para todos los agentes a la vez.
+    env = ss.pettingzoo_env_to_vec_env_v1(env)
+    
+    # Concatenamos los entornos para correrlos en paralelo (simulamos 1 entorno con N agentes)
+    env = ss.concat_vec_envs_v1(env, 1, num_cpus=0, base_class='stable_baselines3')
 
-    @functools.lru_cache(maxsize=None)
-    def action_space(self, agent):
-        # Ejemplo: Velocidad ruedas Izq/Der
-        return Box(low=-5.0, high=5.0, shape=(2,), dtype=np.float32)
+    # 3. Definir el modelo PPO
+    # MlpPolicy: Red neuronal densa estándar (no usamos imágenes, sino vectores numéricos)
+    model = PPO(
+        "MlpPolicy", 
+        env, 
+        verbose=1, 
+        learning_rate=0.0003,
+        batch_size=256,
+        gamma=0.99  # Factor de descuento
+    )
 
-    def reset(self, seed=None, options=None):
-        mujoco.mj_resetData(self.model, self.data)
-        
-        observations = {agent: self._get_obs(agent) for agent in self.agents}
-        infos = {agent: {} for agent in self.agents}
-        return observations, infos
+    print("--- Comenzando el entrenamiento ---")
+    # Entrenamos por 100,000 pasos (ajusta esto según necesites)
+    model.learn(total_timesteps=100000)
+    print("--- Entrenamiento finalizado ---")
 
-    def _get_obs(self, agent):
-        # Usamos tus métodos actuales del controlador
-        ctrl = self.controllers[agent]
-        dist = ctrl.get_lidar_distance() or 2.0 # Valor por defecto
-        pos = self.data.body(agent).xpos # Posición real del robot
-        return np.array([dist, pos[0], pos[1], pos[2]], dtype=np.float32)
+    # 4. Guardar el modelo
+    model.save("mujoco_multiagent_policy")
+    print("Modelo guardado como 'mujoco_multiagent_policy.zip'")
+    
+    env.close()
 
-    def step(self, actions):
-        # 1. Aplicar acciones a los actuadores de MuJoCo
-        for agent, action in actions.items():
-            # Aquí mapeas la acción al motor correspondiente
-            # Ejemplo simplificado:
-            ctrl = self.controllers[agent]
-            if hasattr(ctrl, 'set_wheel_velocities'):
-                ctrl.set_wheel_velocities(action[0], action[1])
-        
-        # 2. Avanzar la física
-        mujoco.mj_step(self.model, self.data)
-        
-        # 3. Calcular recompensas, terminaciones y observaciones
-        observations = {a: self._get_obs(a) for a in self.agents}
-        
-        # Ejemplo de recompensa: +1 por moverse, -100 por chocar
-        rewards = {}
-        terminations = {a: False for a in self.agents}
-        truncations = {a: False for a in self.agents}
-        
-        for a in self.agents:
-            dist = self.controllers[a].get_lidar_distance() or 2.0
-            rewards[a] = 0.1 # Recompensa por sobrevivir
-            if dist < 0.2: # Colisión inminente
-                rewards[a] = -1.0
-                # terminations[a] = True # Opcional: terminar si choca
-        
-        infos = {a: {} for a in self.agents}
-        
-        return observations, rewards, terminations, truncations, infos
+def eval_and_render():
+    """
+    Carga el modelo entrenado y lo visualiza.
+    """
+    print("--- Iniciando Visualización ---")
+    
+    # Creamos el entorno DE NUEVO, esta vez con render_mode='human'
+    env = CustomEnvironment(render_mode="human")
+    
+    # Aplicamos EL MISMO wrapper. Es crucial que la estructura sea idéntica al entrenamiento
+    env = ss.pettingzoo_env_to_vec_env_v1(env)
+    env = ss.concat_vec_envs_v1(env, 1, num_cpus=0, base_class='stable_baselines3')
 
-    def render(self):
-        # Aquí puedes integrar tu lógica de OpenCV o el viewer de MuJoCo
-        pass
+    # Cargamos el modelo
+    model = PPO.load("mujoco_multiagent_policy")
+
+    obs = env.reset()
+    
+    try:
+        while True:
+            # El modelo predice la acción
+            # deterministic=True hace que el robot use lo mejor que aprendió sin explorar
+            action, _states = model.predict(obs, deterministic=True)
+            
+            obs, rewards, dones, infos = env.step(action)
+            
+            # En entornos vectorizados, 'dones' es un array. Si alguno termina, reiniciamos manual o automáticamente
+            # SuperSuit reinicia automáticamente los sub-entornos, así que solo renderizamos.
+            env.render()
+            
+    except KeyboardInterrupt:
+        print("Deteniendo visualización...")
+    finally:
+        env.close()
+
+if __name__ == "__main__":
+    # Paso 1: Entrenar
+    train()
+    
+    # Paso 2: Ver el resultado
+    eval_and_render()

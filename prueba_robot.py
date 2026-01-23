@@ -4,10 +4,18 @@ Autor: Tu Nombre
 Fecha: [Fecha]
 """
 
-from robot_types import RobotType
 import mujoco
 import numpy as np
 import cv2
+
+# Definición de la clase base si no está disponible
+try:
+    from robot_types import RobotType
+except ImportError:
+    # Definición local si no se puede importar
+    class RobotType:
+        def __init__(self, name):
+            self.name = name
 
 class PruebaRobot(RobotType):
     """Robot de prueba simple: cubo con una rueda."""
