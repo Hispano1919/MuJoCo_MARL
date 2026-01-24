@@ -5,8 +5,8 @@ from pettingzoo import ParallelEnv
 import mujoco
 
 # Importamos tus herramientas (asumiendo que están en el mismo directorio)
-from robot_design import generate_robot_xml
-from robot_type_manager import RobotTypeManager
+from Modelos.robot_design import generate_robot_xml
+from Modelos.robot_type_manager import RobotTypeManager
 
 class CustomEnvironment(ParallelEnv):
     metadata = {

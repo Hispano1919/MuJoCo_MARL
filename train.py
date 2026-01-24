@@ -5,7 +5,7 @@ import supersuit as ss
 import os
 
 # Importamos tu entorno (asegúrate de que el archivo se llame environment.py o ajusta el import)
-from environment import CustomEnvironment 
+from Entornos.environment import CustomEnvironment 
 
 def train():
     # 1. Crear el entorno

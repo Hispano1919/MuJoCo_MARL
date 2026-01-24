@@ -4,7 +4,7 @@ Autor: Tu Nombre
 Fecha: [Fecha]
 """
 
-from robot_type_manager import RobotTypeManager
+from Modelos.robot_type_manager import RobotTypeManager
 
 def generate_robot_xml(robot_configs, type_manager=None):
     """

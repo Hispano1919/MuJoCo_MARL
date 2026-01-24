@@ -19,8 +19,8 @@ class RobotTypeManager:
         """Carga los tipos de robots incluidos por defecto."""
         try:
             # Cargar tipos básicos dinámicamente
-            self._load_type_module('basic_robot', 'BasicRobot', 'basico')
-            self._load_type_module('prueba_robot', 'PruebaRobot', 'prueba')
+            self._load_type_module('Modelos/basic_robot', 'BasicRobot', 'basico')
+            self._load_type_module('Modelos/prueba_robot', 'PruebaRobot', 'prueba')
             print(f"Tipos de robots básicos cargados correctamente.")
             print(f"Tipos disponibles: {list(self.robot_types.keys())}")
         except Exception as e:
@@ -42,15 +42,15 @@ class RobotTypeManager:
         """Carga tipos directamente (fallback)."""
         try:
             # Importación directa para evitar problemas de ruta
-            exec(open('basic_robot.py').read(), globals())
-            from basic_robot import BasicRobot
+            exec(open('Modelos/basic_robot.py').read(), globals())
+            from Modelos.basic_robot import BasicRobot
             self.register_type('basico', BasicRobot())
         except Exception as e:
             print(f"No se pudo cargar 'basico': {e}")
         
         try:
-            exec(open('prueba_robot.py').read(), globals())
-            from prueba_robot import PruebaRobot
+            exec(open('Modelos/prueba_robot.py').read(), globals())
+            from Modelos.prueba_robot import PruebaRobot
             self.register_type('prueba', PruebaRobot())
         except Exception as e:
             print(f"No se pudo cargar 'prueba': {e}")

@@ -13,38 +13,12 @@ import numpy as np
 import mujoco
 import mujoco.viewer
 
-# Configurar path para importaciones
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# --- IMPORTACIONES DESDE LA CARPETA 'Modelos' ---
 
-# Importar módulos locales de manera robusta
-def import_local_module(module_name):
-    """Importa un módulo local de manera robusta."""
-    try:
-        # Intento 1: Importación normal
-        return __import__(module_name)
-    except ImportError:
-        try:
-            # Intento 2: Ejecutar el archivo directamente
-            with open(f"{module_name}.py", 'r') as f:
-                code = f.read()
-            exec(code, globals())
-            return sys.modules.get(module_name, None)
-        except Exception as e:
-            print(f"No se pudo importar {module_name}: {e}")
-            return None
-
-# Importar módulos
-robot_design_module = import_local_module('robot_design')
-robot_type_manager_module = import_local_module('robot_type_manager')
-basic_robot_module = import_local_module('basic_robot')
-prueba_robot_module = import_local_module('prueba_robot')
-
-if all(m is not None for m in [robot_design_module, robot_type_manager_module]):
-    from robot_design import generate_robot_xml, save_robot_xml
-    from robot_type_manager import RobotTypeManager
-else:
-    print("Error: No se pudieron importar los módulos necesarios.")
-    sys.exit(1)
+from Modelos.robot_design import generate_robot_xml, save_robot_xml
+from Modelos.robot_type_manager import RobotTypeManager
+from Modelos.basic_robot import BasicRobotController
+from Modelos.prueba_robot import PruebaRobotController
 
 # Configurar entorno de visualización
 os.environ["MUJOCO_GL"] = "glfw"
@@ -140,11 +114,11 @@ def main():
         # Controlador simple basado en tipo
         if robot_type == 'basico':
             # Para robot básico
-            from basic_robot import BasicRobotController
+            from Modelos.basic_robot import BasicRobotController
             controller = BasicRobotController(model, data, robot_name, config)
         elif robot_type == 'prueba':
             # Para robot de prueba
-            from prueba_robot import PruebaRobotController
+            from Modelos.prueba_robot import PruebaRobotController
             controller = PruebaRobotController(model, data, robot_name, config)
         else:
             print(f"   ERROR: Tipo desconocido '{robot_type}' para robot '{robot_name}'")
