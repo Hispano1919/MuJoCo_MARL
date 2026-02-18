@@ -223,9 +223,52 @@ class CustomEnvironment(ParallelEnv):
         """
         Extrae la observación actual de MuJoCo para un agente.
         """
-        # Por ahora devolvemos un vector de ceros con la forma definida
-        # En el siguiente paso lo conectaremos con data.sensordata
-        return np.zeros(self.observation_space(agent).shape, dtype=np.float32)
+        # Formato de observación esperado: [distancia_lidar, vel_izq, vel_der]
+        # (para robots con una sola rueda, vel_der se deja en 0.0)
+        obs = np.zeros(self.observation_space(agent).shape, dtype=np.float32)
+
+        # 1) LiDAR: leemos el sensor por nombre y tomamos la distancia mínima
+        try:
+            lidar_id = mujoco.mj_name2id(
+                self.model, mujoco.mjtObj.mjOBJ_SENSOR, f"distancia_{agent}"
+            )
+            if lidar_id != -1:
+                adr = self.model.sensor_adr[lidar_id]
+                dim = self.model.sensor_dim[lidar_id]
+                lidar_values = self.data.sensordata[adr: adr + dim]
+                obs[0] = float(np.min(lidar_values)) if dim > 0 else 0.0
+        except Exception:
+            obs[0] = 0.0
+
+        # 2) Velocidades de ruedas/articulaciones
+        # Soporte para nombres de joint del robot básico y de prueba.
+        joint_name_candidates = [
+            f"{agent}_base_left_wheel_joint",  # básico (izquierda)
+            f"{agent}_base_right_wheel_joint",  # básico (derecha)
+            f"{agent}_rueda_joint",            # prueba (rueda única)
+        ]
+
+        wheel_velocities = []
+        for joint_name in joint_name_candidates:
+            try:
+                joint_id = mujoco.mj_name2id(
+                    self.model, mujoco.mjtObj.mjOBJ_JOINT, joint_name
+                )
+                if joint_id != -1:
+                    dof_adr = self.model.jnt_dofadr[joint_id]
+                    wheel_velocities.append(float(self.data.qvel[dof_adr]))
+            except Exception:
+                continue
+
+        if len(wheel_velocities) >= 2:
+            obs[1] = wheel_velocities[0]
+            obs[2] = wheel_velocities[1]
+        elif len(wheel_velocities) == 1:
+            # Robot de una sola rueda
+            obs[1] = wheel_velocities[0]
+            obs[2] = 0.0
+
+        return obs
 
     def observation_space(self, agent):
         """Devuelve el espacio de observaciones para un agente específico."""
